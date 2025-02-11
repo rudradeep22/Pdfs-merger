@@ -1,52 +1,78 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QListWidget, QFileDialog, QMessageBox
+    QPushButton, QListWidget, QListWidgetItem, QFileDialog, QMessageBox, QLabel, QFrame
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QIcon
 from PyPDF2 import PdfReader, PdfWriter
 
 class PDFMergerApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PDF Merger")
-        self.setGeometry(100, 100, 600, 400)
+        self.setGeometry(100, 100, 600, 450)
         self.initUI()
 
     def initUI(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(15, 15, 15, 15)
+        main_layout.setSpacing(10)
         central_widget.setLayout(main_layout)
+
+        # Title Label
+        title_label = QLabel("PDF Merger")
+        title_font = QFont("Arial", 18, QFont.Bold)
+        title_label.setFont(title_font)
+        title_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(title_label)
+
+        # Frame for the PDF list
+        list_frame = QFrame()
+        list_frame.setFrameShape(QFrame.StyledPanel)
+        list_layout = QVBoxLayout()
+        list_layout.setContentsMargins(5, 5, 5, 5)
+        list_frame.setLayout(list_layout)
 
         self.list_widget = QListWidget()
         self.list_widget.setDragDropMode(QListWidget.InternalMove)
-        main_layout.addWidget(self.list_widget)
+        list_layout.addWidget(self.list_widget)
+        main_layout.addWidget(list_frame)
 
+        # Horizontal layout for buttons
         buttons_layout = QHBoxLayout()
+        buttons_layout.setSpacing(15)
         main_layout.addLayout(buttons_layout)
 
         self.btn_add = QPushButton("Add PDF")
+        self.btn_add.setStyleSheet("padding: 10px;")
         self.btn_add.clicked.connect(self.add_pdf)
         buttons_layout.addWidget(self.btn_add)
 
         self.btn_remove = QPushButton("Remove PDF")
+        self.btn_remove.setStyleSheet("padding: 10px;")
         self.btn_remove.clicked.connect(self.remove_pdf)
         buttons_layout.addWidget(self.btn_remove)
 
         self.btn_merge = QPushButton("Merge PDFs")
+        self.btn_merge.setStyleSheet("padding: 10px;")
         self.btn_merge.clicked.connect(self.merge_pdfs)
         buttons_layout.addWidget(self.btn_merge)
 
     def add_pdf(self):
-        """Opens a file dialog to select one or more PDF files."""
+        """Opens a file dialog to select one or more PDF files and adds them with default PDF icons."""
         options = QFileDialog.Options()
         files, _ = QFileDialog.getOpenFileNames(self, "Select PDF files", "",
                                                 "PDF Files (*.pdf)", options=options)
         if files:
             for file in files:
+                # Prevent adding duplicate entries
                 if not any(self.list_widget.item(i).text() == file for i in range(self.list_widget.count())):
-                    self.list_widget.addItem(file)
+                    # Create a list widget item with an icon.
+                    item = QListWidgetItem(QIcon("pdf-file.png"), file)
+                    self.list_widget.addItem(item)
 
     def remove_pdf(self):
         """Removes the selected PDF files from the list."""
@@ -69,7 +95,6 @@ class PDFMergerApp(QMainWindow):
             return
 
         pdf_writer = PdfWriter()
-
         pdf_files_ordered = [self.list_widget.item(i).text() for i in range(self.list_widget.count())]
 
         try:
