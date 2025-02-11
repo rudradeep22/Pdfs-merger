@@ -1,2 +1,16 @@
-.vscode
-venv/*
+# Compiled source
+*.com
+*.exe
+*.dll
+*.obj
+*.o
+*.cpython-3*.pyc
+
+# Distribution / packaging
+.DS_Store
+/dist
+/build
+/*.spec
+/venv
+venv/
+__pycache__/
